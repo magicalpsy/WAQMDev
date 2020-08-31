@@ -1,20 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>Bootstrap Example</title>
+  <title>Network AI Devlop Example</title>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+<!--   <meta name="viewport" content="width=device-width, initial-scale=1"> -->
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.2/animate.min.css">
   <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
-  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-<style>
-
-</style>       
+     
   <style>
   .fakeimg {
     height: 200px;
@@ -35,13 +28,33 @@
     background-color: #f1f1f1;
     padding: 10px;
   }
+      ul {
+          list-style-type: none;
+          margin: 0;
+          padding: 0;
+          overflow: hidden;
+          background-color: #333;
+        }
+        li {
+          float: left;
+        }
+        li a {
+          display: block;
+          color: white;
+          text-align: center;
+          padding: 14px 16px;
+          text-decoration: none;
+        }
+        li a:hover:not(.active) {
+          background-color: #111;
+        }
    html,body,h1,h2,h3,h4,h5 {font-family: "Raleway", sans-serif}
   </style>
 </head>
 <body class="w3-light-grey">
-<div class="w3-bar w3-top w3-black w3-large" style="z-index:4">
-  <span class="w3-bar-item w3-right">Logo</span>
-</div>
+<ul>
+    <li><a class="active" href="#home">분석 결과</a></li>
+</ul>
 <div class="jumbotron text-center">
   <h1>Wireless Aanalysis Quality Page</h1>
   <p> ddddddddddd</p> 
@@ -70,7 +83,7 @@
     {% endif %}
     {% if image_file %}
     <hr>
-    <div class="w3-card-4" style="width:100%">
+    <div class="w3-card-4"  style="width:100%" >
         <header class="w3-container w3-light-grey">
             <h3> Call 정보 창</h3>
         </header>
@@ -78,7 +91,7 @@
         <hr>
             <p> 지표 값 보여 주는 창</p><br>
         </div>
-        <button class="w3-button w3-block w3-dark-grey">+ 분석</button>
+        <button class="w3-button w3-block w3-dark-grey"><a href={{open_page}} > + 분석</a> </button>
     </div>
     {% endif %}
 </div>

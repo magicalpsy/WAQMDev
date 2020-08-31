@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>박재상 홈페이지</title>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.2/animate.min.css">
+        <link rel="stylesheet" href="/public/style.css">
+        <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <style>
+        ul {
+          list-style-type: none;
+          margin: 0;
+          padding: 0;
+          overflow: hidden;
+          background-color: #333;
+        }
+        li {
+          float: left;
+        }
+        li a {
+          display: block;
+          color: white;
+          text-align: center;
+          padding: 14px 16px;
+          text-decoration: none;
+        }
+        li a:hover:not(.active) {
+          background-color: #111;
+        }
+        .active {
+          background-color: #4CAF50;
+        }
+    </style>
+
+</head>
+    <body>
+        <ul>
+          <li><a class="active" href="#home">분석 결과</a></li>
+          <li><a href="#news">분석데이터 등록</a></li>
+          <li><a href="#contact">Contact</a></li>
+          <li style="float:right"><a href="#about">About</a></li>
+        </ul>
+        <div class="w3-container">
+            <p>측정일 과 업로드 User 선택 -> 콜ID 선택</p>    
+          <table class="w3-table w3-bordered w3-striped">
+            <thead>
+              <tr>
+                <th>SINR</th>
+                <th>RSRP</th>
+                <th>MCS</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>8</td>
+                <td>-30</td>
+                <td>10</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+<div class="w3-row-padding w3-margin-top">
+    
+  <div class="w3-half">
+    <div class="w3-card">
+<!--       <img src="img_london.jpg" alt="London" style="width:100%"> -->
+      <div class="w3-container">
+          <p>{{ call_id }}</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="w3-half">
+    <div class="w3-card">
+      <div class="w3-container">
+        <p> 지도창 </p>
+      </div>
+    </div>
+  </div>
+</div>
+    </body>
+</html>
+

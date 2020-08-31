@@ -8,8 +8,7 @@ app = Flask(__name__, template_folder='template')
 
 @app.route('/')
 def index_html():
-    call_id = "그래프 표시"
-    return render_template('index.html', filename="", afteruplaod= "아래에 완성된 페이지 사용법", map_po = Markup('<div class="fakeimg">Fake Image</div>'))
+    return render_template('index.html', filename="")
 
 @app.route('/fileUpload', methods=['GET', 'POST'])
 def FileUload():
@@ -19,8 +18,12 @@ def FileUload():
         route =  'C:/Work/flask/cssfile/'
         f.save(route + secure_filename(f.filename))
     return render_template('index.html', filename="아래 사진 영역에 MAP 보여 주기",
-                           afteruplaod="아래 부분에 지도 출력",
-                           map_po = Markup('<div class="fakeimg"> Fake Image</div>'),
                            image_file = "image/1.jpg",
-                           Map_Info = "맵에 대한 설명")
+                           Map_Info = "맵에 대한 설명",
+                          open_page = "http://localhost:5000/analysis/"+f.filename)
 
+@app.route('/analysis/<path>')
+def analysis_html(path):
+    print(path)
+    return render_template('analysis-temp.html', filename="")
+#     return render_template('analysis-Test.html', filename="", image_file = "image/region.jpg")
