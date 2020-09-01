@@ -7,7 +7,24 @@
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.2/animate.min.css">
   <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
-     
+  <script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
+    
+    <script>
+    $(document).ready(function(){
+        $("iframe").load(function(){
+            $(this).contents().on("click", function(){
+                var getval = null;
+                getval = $('#my_iframe').contents().find('.leaflet-popup-content').text();
+//                 var getval2 = $('#my_iframe').contents().find('.leaflet-popup-content').html();                ;
+                if(getval.length > 0)
+                {
+                    location.replace("/"+getval);
+                }
+            });
+        });
+    });
+    </script>
+    
   <style>
   .fakeimg {
     height: 200px;
@@ -48,17 +65,18 @@
         li a:hover:not(.active) {
           background-color: #111;
         }
+     
+      
+
    html,body,h1,h2,h3,h4,h5 {font-family: "Raleway", sans-serif}
   </style>
 </head>
+    
+
 <body class="w3-light-grey">
 <ul>
     <li><a class="active" href="#home">분석 결과</a></li>
 </ul>
-<div class="jumbotron text-center">
-  <h1>Wireless Aanalysis Quality Page</h1>
-  <p> ddddddddddd</p> 
-</div>
 
 <div class="container mt-3">
   <div class="row">
@@ -72,26 +90,24 @@
         </form>
       </div>
     </div>
-    <hr>
     {% if image_file %}
     <div class="w3-card-4">
       <header class="w3-container w3-light-grey">
         <h3>{{filename}}</h3>
       </header>
-      <img src="{{ url_for('static',filename=image_file )}}" alt="Car" height="400", width="100%" >
+      <iframe id = 'my_iframe' name="iframe_main_map" src="/map/test.html" width="100%" height ="300px" ></iframe>
     </div>
     {% endif %}
-    {% if image_file %}
+    {% if main_table %}
     <hr>
-    <div class="w3-card-4"  style="width:100%" >
+    <div class="w3-card-4 "  style="width:100%" >
         <header class="w3-container w3-light-grey">
-            <h3> Call 정보 창</h3>
+            <h3> Call id information</h3>
         </header>
-        <div class="w3-container">
-        <hr>
-            <p> 지표 값 보여 주는 창</p><br>
+        <div class="w3-container table-responsive">
+            {{main_table}}
         </div>
-        <button class="w3-button w3-block w3-dark-grey"><a href={{open_page}} > + 분석</a> </button>
+        <button class="w3-button w3-block w3-dark-grey"><a href={{open_page}}> + 분석</a> </button>
     </div>
     {% endif %}
 </div>
