@@ -100,14 +100,14 @@
     {% endif %}
     {% if main_table %}
     <hr>
-    <div class="w3-card-4 "  style="width:100%" >
+    <div class="w3-card-4" style="width:100%" >
         <header class="w3-container w3-light-grey">
             <h3> Call id information</h3>
         </header>
         <div class="w3-container table-responsive">
             {{main_table}}
         </div>
-        <button class="w3-button w3-block w3-dark-grey"><a href={{open_page}}> + 분석</a> </button>
+        <a href="{{open_page|safe}}" target="_blank"><button class="w3-button w3-block w3-dark-grey"> + 분석 </button></a>
     </div>
     {% endif %}
 </div>
