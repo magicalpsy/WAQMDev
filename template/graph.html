@@ -1,0 +1,102 @@
+<html>
+<meta name="viewport" content = "width=device-width, initial-scale=1.0">
+<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+<!-- <script src="http://code.highcharts.com/highcharts.js"></script> -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highcharts/5.0.14/highcharts.js"></script> 
+<head>
+<script>
+	var chart_id = [];
+	var chart = [];
+	var series = [];
+	var title = [];
+	var xAxis = [];
+	var yAxis = [];
+	{% for chartInfoItem in chartInfo %}
+		chart.push({{ chartInfoItem[0]|safe }});
+		series.push({{ chartInfoItem[1]|safe }});
+		title.push({{ chartInfoItem[2]|safe }});
+		xAxis.push({{ chartInfoItem[3]|safe }});
+		yAxis.push({{ chartInfoItem[4]|safe }});
+	{% endfor %}
+
+	$(document).ready(function() {
+        $('#nr5g_Rx_NumOfRB').highcharts({
+			chart: chart[8],
+			title: title[8],
+			xAxis: xAxis[8],
+			yAxis: yAxis[8],
+			series: series[8]
+		});
+        $('#nr5g_UlMcs_Avg').highcharts({
+			chart: chart[7],
+			title: title[7],
+			xAxis: xAxis[7],
+			yAxis: yAxis[7],
+			series: series[7]
+		});
+		$('#nr5g_Rx_NumOfRb_Avg').highcharts({
+			chart: chart[6],
+			title: title[6],
+			xAxis: xAxis[6],
+			yAxis: yAxis[6],
+			series: series[6]
+		});
+		$('#nr5g_DlMcs_Ant0_Avg').highcharts({
+			chart: chart[5],
+			title: title[5],
+			xAxis: xAxis[5],
+			yAxis: yAxis[5],
+			series: series[5]
+		});
+        $('#nr5g_pc_pusch_bler').highcharts({
+			chart: chart[4],
+			title: title[4],
+			xAxis: xAxis[4],
+			yAxis: yAxis[4],
+			series: series[4]
+		});
+        $('#nr5g_Pdsch_Bler').highcharts({
+			chart: chart[3],
+			title: title[3],
+			xAxis: xAxis[3],
+			yAxis: yAxis[3],
+			series: series[3]
+		});
+        $('#nr5g_TxPwrTotal').highcharts({
+			chart: chart[2],
+			title: title[2],
+			xAxis: xAxis[2],
+			yAxis: yAxis[2],
+			series: series[2]
+		});
+		$('#nr5g_Sinr').highcharts({
+			chart: chart[1],
+			title: title[1],
+			xAxis: xAxis[1],
+			yAxis: yAxis[1],
+			series: series[1]
+		});
+		$('#nr5g_Rsrp').highcharts({
+			chart: chart[0],
+			title: title[0],
+			xAxis: xAxis[0],
+			yAxis: yAxis[0],
+			series: series[0]
+		});
+	});
+</script>
+    
+</head>
+<body>
+	<div id="nr5g_Rsrp" class="chart" style="height: 27vh; width: 100%"></div>
+	<div id="nr5g_Sinr" class="chart" style="height: 27vh; width: 100%"></div>
+    <div id="nr5g_TxPwrTotal" class="chart" style="height: 27vh; width: 100%"></div>
+    <div id="nr5g_Pdsch_Bler" class="chart" style="height: 27vh; width: 100%"></div>
+    <div id="nr5g_pc_pusch_bler" class="chart" style="height: 27vh; width: 100%"></div>
+    <div id="nr5g_DlMcs_Ant0_Avg" class="chart" style="height: 27vh; width: 100%"></div>
+    <div id="nr5g_Rx_NumOfRb_Avg" class="chart" style="height: 27vh; width: 100%"></div>
+    <div id="nr5g_UlMcs_Avg" class="chart" style="height: 27vh; width: 100%"></div>
+    <div id="nr5g_Rx_NumOfRB" class="chart" style="height: 27vh; width: 100%"></div>
+<!--     <div id="nr5g_Rx_NumOfRb_Avg" class="chart" style="height: 35vh; width: 100%"></div> -->
+</body>
+</html>		
