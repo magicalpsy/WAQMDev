@@ -1,115 +1,145 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>Network AI Devlop Example</title>
-  <meta charset="utf-8">
-<!--   <meta name="viewport" content="width=device-width, initial-scale=1"> -->
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.2/animate.min.css">
-  <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
-  <script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
-    
+    <title>Network AI Devlop Example</title>
+    <meta charset="utf-8">
+    <!--   <meta name="viewport" content="width=device-width, initial-scale=1"> -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.2/animate.min.css">
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
     <script>
-    $(document).ready(function(){
-        $("iframe").load(function(){
-            $(this).contents().on("click", function(){
-                var getval = null;
-                getval = $('#my_iframe').contents().find('.leaflet-popup-content').text();
-//                 var getval2 = $('#my_iframe').contents().find('.leaflet-popup-content').html();                ;
-                if(getval.length > 0)
-                {
-                    location.replace("/"+getval);
-                }
+
+
+        $(document).ready(function(){
+            $("iframe").load(function(){
+                $(this).contents().on("click", function(){
+                    var getval = null;
+                    getval = $('#my_iframe').contents().find('.leaflet-popup-content').text();
+                    if(getval.length > 0)
+                    {
+                        location.replace("/"+getval);
+                    }
+                });
             });
         });
-    });
+        //   동적으로-select-option-추가-하기 나중에 검토 
+        function itemChange(){
+            var sec = ['5Sec, 1Sec'];
+            var speed_CNN_Text = ["200Mbps", "12Mbps", ];
+            var speed_Etc = ['200Mbps', ];
+            var selectItem = $("#select1").val();
+            var changeItem;
+            if(selectItem == "12Mbps"){
+              changeItem = keyboard;
+            $('#select2').empty();
+            for(var count = 0; count < changeItem.size(); count++){                
+                            var option = $("<option>"+changeItem[count]+"</option>");
+                            $('#select2').append(option);
+            }
+        }
     </script>
-    
-  <style>
-  .fakeimg {
-    height: 200px;
-    background: #aaa;
-  }
-  .topnav {
-    overflow: hidden;
-    background-color: #333;
-  }
-  .content {
-    background-color: #ddd;
-    padding: 10px;
-    height: 200px; /* Should be removed. Only for demonstration */
-  }
+    <style>
+        .fakeimg {
+            height: 200px;
+            background: #aaa;
+        }
+        .topnav {
+            overflow: hidden;
+            background-color: #333;
+        }
+        .content {
+            background-color: #ddd;
+            padding: 10px;
+            height: 200px; /* Should be removed. Only for demonstration */
+        }
 
-/* Style the footer */
-  .footer {
-    background-color: #f1f1f1;
-    padding: 10px;
-  }
-      ul {
-          list-style-type: none;
-          margin: 0;
-          padding: 0;
-          overflow: hidden;
-          background-color: #333;
+        /* Style the footer */
+        .footer {
+            background-color: #f1f1f1;
+            padding: 10px;
+        }
+        ul {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: #333;
         }
         li {
-          float: left;
+            float: left;
         }
         li a {
-          display: block;
-          color: white;
-          text-align: center;
-          padding: 14px 16px;
-          text-decoration: none;
+            display: block;
+            color: white;
+            text-align: center;
+            padding: 14px 16px;
+            text-decoration: none;
         }
         li a:hover:not(.active) {
-          background-color: #111;
+            background-color: #111;
         }
-     
-      
-
-   html,body,h1,h2,h3,h4,h5 {font-family: "Raleway", sans-serif}
-  </style>
+        html,body,h1,h2,h3,h4,h5 {font-family: "Raleway", sans-serif}
+    </style>
 </head>
-    
-
 <body class="w3-light-grey">
-<ul>
-    <li><a class="active" href="#home">분석 결과</a></li>
-</ul>
-
-<div class="container mt-3">
-  <div class="row">
-      <div class="d-flex p-3" >
-          <h3>분석파일 업로드 : </h3>
-      </div>
-      <div class="d-flex p-3 " >
-        <form action = "http://localhost:5000/fileUpload" method = "POST" enctype = "multipart/form-data">
-          <input type = "file" name = "file" class="btn btn-info" value="File Button">
-          <input type = "submit" class="btn btn-info" value="업로드">
-        </form>
-      </div>
-    </div>
-    {% if image_file %}
-    <div class="w3-card-4">
-      <header class="w3-container w3-light-grey">
-        <h3>{{filename}}</h3>
-      </header>
-      <iframe id = 'my_iframe' name="iframe_main_map" src="/map/test.html" width="100%" height ="300px" ></iframe>
-    </div>
-    {% endif %}
-    {% if main_table %}
-    <hr>
-    <div class="w3-card-4" style="width:100%" >
-        <header class="w3-container w3-light-grey">
-            <h3> Call id information</h3>
-        </header>
-        <div class="w3-container table-responsive">
-            {{main_table}}
+    <ul>
+        <li><a class="active" href="#home">분석 결과</a></li>
+    </ul>
+    <div class="container mt-3">
+        <div class="row">
+            <div class="d-flex p-3" >
+                <h3>분석파일 업로드 : </h3>
+            </div>
+            <div class="d-flex p-3 " >
+                <form action = "http://localhost:5000/fileUpload" method = "POST" enctype = "multipart/form-data">
+                    <input type = "file" name = "file" class="btn btn-info" value="File Button">
+                    <input type = "submit" class="btn btn-info" value="업로드">
+                </form>
+            </div>
         </div>
-        <a href="{{open_page|safe}}" target="_blank"><button class="w3-button w3-block w3-dark-grey"> + 분석 </button></a>
+        {% if image_file %}
+        <div class="w3-card-4">
+          <header class="w3-container w3-light-grey">
+            <h3>{{filename}}</h3>
+          </header>
+          <iframe id = 'my_iframe' name="iframe_main_map" src="/map/test.html" width="100%" height ="280px" ></iframe>
+        </div>
+        {% endif %}
+        {% if main_table %}
+        <br>
+        <div class="w3-card-4" style="width:100%" >
+            <header class="w3-container w3-light-grey">
+                <h3> Call id information</h3>
+            </header>
+            <div class="w3-container table-responsive">
+                {{main_table}}
+            </div> 
+            <div class="w3-container" style="width:100%; height:30px">
+                <form method="POST" action={{open_page|safe}}>
+                    <select name="model-select" class="form-control-model" style="width:20%">
+                        <option value="CNN_TEXT" selected>CNN_Text</option>
+                        <option value="CNN_VMATRIX" > CNN_VMATRIX</option>
+                        <option value="CNN_IMAGE">CNN_Graph</option>
+                        <option value="ATT_A">Attention_A</option>
+                        <option value="ATT_B">Attention_B</option>
+                    </select>
+                    <select name="model-speed" class="form-control-speed" style="width:10%">
+                        <option value="200" selected>200Mbps</option>
+                        <option value="12">12Mbps</option>
+                    </select>
+<!--                     <select name="model-analysis_sec" class="form-control-speed" style="width:10%">
+                        <option value="1" selected>1Sec</option>
+                        <option value="5">5Sec</option>
+                    </select> -->
+                    <input type = "submit" value = "submit" class="w3-dark-grey" style="width:50%; float:right">
+                </form>
+            </div>
+    <!--             <div style="width:100%">
+    <a href="{{open_page|safe}}" target="_blank"><button class="w3-button w3-block w3-dark-grey" > + 분석 </button></a>
+    </div> -->
+        </div>
+        {% endif %}
     </div>
-    {% endif %}
-</div>
 </body>
 </html>
