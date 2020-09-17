@@ -10,6 +10,8 @@ from flask import Flask, request, redirect, url_for
 from flask import render_template,Markup
 from werkzeug.utils import secure_filename
 
+import webbrowser
+
 # Map 관련 라이브러리
 import folium
 from folium.plugins import MarkerCluster
@@ -37,12 +39,12 @@ m = folium.Map(
 
 marker_cluster = MarkerCluster().add_to(m)
 g_testCombine = ""
+
+#전역변수 지정
 grad_index_columns = 0
 grad_index_rows = 0
-#전역변수 지정
-# g_call_id = ""
-# g_testCombine = pd.DataFrame("")
-# g_testresult = pd.DataFrame("")
+select_model = 0
+select_speed = 0
 
 app.config['JSON_AS_ASCII'] = False
 app.config['JSONIFY_PRETTYPRINT_REGULAR'] = True
@@ -51,11 +53,6 @@ app.config['JSONIFY_PRETTYPRINT_REGULAR'] = True
 import math
 import decimal
 def background_color(val, grad_cam, total_df):
-    """
-    Takes a scalar and returns a string with
-    the css property `'color: red'` for negative
-    strings, black otherwise.
-    """
     global grad_index_rows
     global grad_index_columns
     grad_index_rows = grad_index_rows + 1
@@ -90,7 +87,6 @@ def background_color(val, grad_cam, total_df):
             if val > -95:
                 color = 'black'
                 return 'background-color: %s' % color
-        
         elif temp_b == 4:
             if val < 15:
                 color = 'black'
@@ -124,7 +120,6 @@ def background_color(val, grad_cam, total_df):
 
 # 업로드 된 파일을 받아서 upload_file csv 생성 및 main makrer 생성
 def make_html(filename):
-     
     test_file = r'C://Work//AI_Data_road_test//202007_NQI_도로_수도권_KT_NR5G_FTP_DL.csv'
     route =  'C:/Work/flask/cssfile/' + secure_filename(filename)
     testCombine = pd.read_csv(route, encoding='cp949')
@@ -178,10 +173,9 @@ def make_predict_map_html(testCombine):
 
 # 예측을 위한 가중치 환산
 def generate_gradcam(img_tensor, model, class_index, activation_layer):
-    y_c = model.outputs[0].op.inputs[0][0, class_index]
-    A_k = model.get_layer(activation_layer).output
+#     y_c = model.outputs[0].op.inputs[0][0, class_index]
+#     A_k = model.get_layer(activation_layer).output
     grad_model = tf.keras.models.Model([model.inputs], [model.get_layer(activation_layer).output, model.output])
-    
     with tf.GradientTape() as tape:
         conv_outputs, predictions = grad_model([img_tensor])
         loss = predictions[:, 1]
@@ -253,54 +247,67 @@ def make_predict_df(path):
     testCombine = pd.read_csv('C:/Work/flask/cssfile/upload_file.csv', encoding='cp949')
     test_result = testCombine[testCombine['total_call_state'] == 'Traffic-3']
     test_result.reset_index(drop=True, inplace=True)
-    test_list = test_result[['call_id','latitude', 'longitude','serving_network','sampled_time','call_type','total_call_state','nr5g_PCI','nr5g_Rsrp','nr5g_Sinr','nr5g_TxPwrTotal_Actual','nr5g_Pdsch_Bler','nr5g_pc_pusch_bler','nr5g_DlMcs_Ant0_Avg','nr5g_Rx_NumOfRb_Avg','nr5g_UlMcs_Avg','nr5g_Rx_NumOfRB','data_ex_rx_thravg','data_ftp_rx_tp']]
+    test_list = test_result[['call_id','latitude', 'longitude','serving_network','sampled_time','call_type','total_call_state',
+                             'nr5g_PCI','nr5g_Rsrp','nr5g_Sinr','nr5g_TxPwrTotal_Actual','nr5g_Pdsch_Bler',
+                             'nr5g_pc_pusch_bler','nr5g_DlMcs_Ant0_Avg',
+                             'nr5g_Rx_NumOfRb_Avg','nr5g_UlMcs_Avg','nr5g_Rx_NumOfRB','data_ex_rx_thravg','data_ftp_rx_tp']]
+    
+    
     test_list.loc[ : ,'result'] = 0
     test_list.loc[test_list['data_ftp_rx_tp'] < 200, 'result'] = 1
     table_df = test_list[test_result['call_id'] == path]
-    test_drop_list = table_df.drop(['call_id', 'latitude', 'longitude','sampled_time' ,'serving_network','call_type','total_call_state', 'nr5g_PCI', 'nr5g_Rx_NumOfRB','result','data_ftp_rx_tp','data_ex_rx_thravg'],axis=1)
+    test_drop_list = table_df.drop(['call_id', 'latitude', 'longitude','sampled_time', 'serving_network', 'call_type',
+                                    'total_call_state', 'nr5g_PCI', 'nr5g_Rx_NumOfRB','result','data_ftp_rx_tp','data_ex_rx_thravg'],
+                                   axis=1)
+        
     test_drop_scale = scaler.transform(test_drop_list)
-    test_drop_reshape = test_drop_scale.reshape(-1,1,8,1)
+    test_drop_reshape = test_drop_scale.reshape(-1,1,test_drop_list.shape[1],1)
     conv_name = 'conv2d_5'
     grad_cam_total = []
     for i in range(len(test_drop_scale)):
         grad_cam_data = test_drop_scale[i]
-        grad_cam_data = grad_cam_data.reshape(-1,1,8,1)
+        grad_cam_data = grad_cam_data.reshape(-1,1,test_drop_list.shape[1],1)
         test_pred = model.predict(grad_cam_data)
         grad_cam, grad_val = generate_gradcam(grad_cam_data, model , 1, conv_name)
         grad_cam_total.append(grad_cam)
-    grad_cam_total =np.array(grad_cam_total).reshape(-1,8)
-    temp=pd.DataFrame(grad_cam_total, columns=['pre_rsrp', 'pre_sinr', 'pre_Txpwr', 'pre_dl_bler', 'pre_ul_bler', 'pre_dl_mcs', 'pre_dl_rb','pre_ul_mcs'])
+    grad_cam_total =np.array(grad_cam_total).reshape(-1,test_drop_list.shape[1])
+    temp=pd.DataFrame(grad_cam_total, 
+                      columns=['pre_rsrp', 'pre_sinr', 'pre_Txpwr', 'pre_dl_bler', 'pre_ul_bler', 'pre_dl_mcs', 'pre_dl_rb','pre_ul_mcs'])
     table_df.reset_index(drop=True, inplace=True)
     merge_sample = pd.concat([table_df, temp],axis=1)
     return merge_sample, temp
 
-# 그래프 코드
+# 그래프 코드 왼쪽 칸
 def getSeries(df,option):
     series = '['
     series += '{"name":"' + option + '","data":['
     for index, row in df.iterrows():
         if(np.isnan(row[option])):
-            series += '[' + str(time.mktime(dt.datetime.strptime(row['sampled_time'], '%Y-%m-%d %H:%M:%S').timetuple())) + ',' + 'null' + '],'
+            series += '[' + str(time.mktime(dt.datetime.strptime(row['sampled_time'],
+                                                                 '%Y-%m-%d %H:%M:%S').timetuple())) + ',' + 'null' + '],'
         else:
-            series += '[' + str(time.mktime(dt.datetime.strptime(row['sampled_time'], '%Y-%m-%d %H:%M:%S').timetuple())) + ',' + str(int(row[option])) + '],'
+            series += '[' + str(time.mktime(dt.datetime.strptime(row['sampled_time'],
+                                                                 '%Y-%m-%d %H:%M:%S').timetuple())) + ',' + str(int(row[option])) + '],'
     series = series[:-1]
     series += ']},'
     series = series[:-1] + ']'
     return series
 
 @app.route('/graph')
-# @app.route('/analysis/graph/<path>')
 @app.route('/analysis/graph/<path>')
 def graph(path):
     testCombine = pd.read_csv('C:/Work/flask/cssfile/upload_file.csv', encoding='cp949')
-#     test_result = testCombine[testCombine['total_call_state'] == 'T-3초 계산구간']
     test_result = testCombine[testCombine['total_call_state'] == 'Traffic-3']
     test_result.reset_index(drop=True, inplace=True)
     table_df = test_result[test_result['call_id'] == path]
-    renderTo = ['nr5g_Rsrp','nr5g_Sinr','nr5g_TxPwrTotal_Actual','nr5g_Pdsch_Bler','nr5g_pc_pusch_bler','nr5g_DlMcs_Ant0_Avg','nr5g_Rx_NumOfRb_Avg','nr5g_UlMcs_Avg', 'nr5g_Rx_NumOfRB']
-    option =['nr5g_Rsrp','nr5g_Sinr','nr5g_TxPwrTotal_Actual','nr5g_Pdsch_Bler','nr5g_pc_pusch_bler','nr5g_DlMcs_Ant0_Avg','nr5g_Rx_NumOfRb_Avg','nr5g_UlMcs_Avg', 'nr5g_Rx_NumOfRB']
-    ttext=['nr5g_Rsrp','nr5g_Sinr','nr5g_TxPwrTotal_Actual','nr5g_Pdsch_Bler','nr5g_pc_pusch_bler','nr5g_DlMcs_Ant0_Avg','nr5g_Rx_NumOfRb_Avg','nr5g_UlMcs_Avg', 'nr5g_Rx_NumOfRB']
-    ytext=['nr5g_Rsrp','nr5g_Sinr','nr5g_TxPwrTotal_Actual','nr5g_Pdsch_Bler','nr5g_pc_pusch_bler','nr5g_DlMcs_Ant0_Avg','nr5g_Rx_NumOfRb_Avg','nr5g_UlMcs_Avg', 'nr5g_Rx_NumOfRB']
+    renderTo = ['nr5g_Rsrp','nr5g_Sinr','nr5g_TxPwrTotal_Actual','nr5g_Pdsch_Bler','nr5g_pc_pusch_bler',
+                'nr5g_DlMcs_Ant0_Avg','nr5g_Rx_NumOfRb_Avg','nr5g_UlMcs_Avg', 'nr5g_Rx_NumOfRB']
+    option = ['nr5g_Rsrp','nr5g_Sinr','nr5g_TxPwrTotal_Actual','nr5g_Pdsch_Bler','nr5g_pc_pusch_bler','nr5g_DlMcs_Ant0_Avg',
+             'nr5g_Rx_NumOfRb_Avg','nr5g_UlMcs_Avg', 'nr5g_Rx_NumOfRB']
+    ttext= ['nr5g_Rsrp','nr5g_Sinr','nr5g_TxPwrTotal_Actual','nr5g_Pdsch_Bler','nr5g_pc_pusch_bler',
+           'nr5g_DlMcs_Ant0_Avg','nr5g_Rx_NumOfRb_Avg','nr5g_UlMcs_Avg', 'nr5g_Rx_NumOfRB']
+    ytext= ['nr5g_Rsrp','nr5g_Sinr','nr5g_TxPwrTotal_Actual','nr5g_Pdsch_Bler','nr5g_pc_pusch_bler','nr5g_DlMcs_Ant0_Avg',
+           'nr5g_Rx_NumOfRb_Avg','nr5g_UlMcs_Avg', 'nr5g_Rx_NumOfRB']
     chartInfo = []
     chart_type = 'line'
     chart_height = 200
@@ -311,28 +318,38 @@ def graph(path):
         xAxis = {"type":"datetime"}
         yAxis = {"title":{"text":ytext[i]}}
         chartInfo.append([chart, series, title, xAxis, yAxis])
-#         chartInfo2.app
-    
     return render_template('graph.html', chartInfo=chartInfo,)
 # 그래프코드 종료
+
+# 오른쪽 위 상단  - 원본 HeapMap 으로 간단하게 일단 처리
+
+
+
+
+
+# 오른쪽 위 상단 종료 
+
+
+
+
 @app.route('/')
 def index_html():
     return render_template('index.html', filename="",
                                Map_Info = "맵에 대한 설명",
                                open_page = "http://localhost:5000/analysis/123.html")
 
-@app.route('/<path>')
+@app.route('/<path>', methods=['GET', 'POST'])
 def click_location(path):
     testCombine = pd.read_csv('C:/Work/flask/cssfile/upload_file.csv', encoding='cp949')
     test_result = testCombine[testCombine['total_call_state'] == 'Traffic-3']
     test_result.reset_index(drop=True, inplace=True)
     table_df = test_result[test_result['call_id'] == path]
     return render_template('index.html', filename="",
-                               image_file = "image/1.jpg",
-                               Map_Info = "맵에 대한 설명",
-                               main_table = Markup(table_df.to_html(classes='table table-striped', 
-                                                index=False, justify='center', header=True)),
-                               open_page = "http://localhost:5000/analysis/"+path)
+                           image_file = "image/1.jpg",
+                           Map_Info = "맵에 대한 설명",
+                           main_table = Markup(table_df.to_html(classes='table table-striped', 
+                                            index=False, justify='center', header=True)),
+                           open_page = f"""http://localhost:5000/select_model/{path}""")
 
 @app.route('/map/test.html')
 def map_html():
@@ -350,7 +367,6 @@ def FileUload():
         route =  'C:/Work/flask/cssfile/'
         f.save(route + secure_filename(f.filename))
         make_html(f.filename)
-    
     return render_template('index.html', filename="아래 사진 영역에 MAP 보여 주기",
                            image_file = "image/1.jpg",
                            Map_Info = "맵에 대한 설명",
@@ -358,30 +374,56 @@ def FileUload():
                           )
  
 ## 분석 페이지의 Main Page
-@app.route('/analysis/<path>')
-def analysis_html(path):
-    df_raw, grad_cam = make_predict_df(path)
-    df_predict_ranking = top_match(df_raw)
-    df = pd.concat([df_raw, df_predict_ranking], axis=1)
-    df = make_predict_map_html(df)
-    df_raw.reset_index(drop=True, inplace=True)
-    table_df = df_raw[df_raw['call_id'] == path]
-    test_list = table_df[['serving_network','nr5g_PCI','nr5g_Rsrp','nr5g_Sinr','nr5g_TxPwrTotal_Actual','nr5g_Pdsch_Bler','nr5g_pc_pusch_bler','nr5g_DlMcs_Ant0_Avg','nr5g_Rx_NumOfRb_Avg','nr5g_UlMcs_Avg','nr5g_Rx_NumOfRB', 'data_ex_rx_thravg','data_ftp_rx_tp']]
-    
-    global grad_index_rows
-    global grad_index_columns
-    grad_index_columns = 0
-    grad_index_rows = 0
-    
-    s = test_list.style.applymap(background_color, 
-                                 grad_cam = np.array(grad_cam),
-                                 total_df = table_df).highlight_null('black')
-    
+@app.route('/analysis/<model>/<speed>/<path>')
+def analysis_html(model,speed,path):
+    s=""
+    if(model == 'CNN_TEXT'):
+        if(speed == '200'):
+            df_raw, grad_cam = make_predict_df(path, )
+            df_predict_ranking = top_match(df_raw)
+            df = pd.concat([df_raw, df_predict_ranking], axis=1)
+            df = make_predict_map_html(df)
+            df_raw.reset_index(drop=True, inplace=True)
+            table_df = df_raw[df_raw['call_id'] == path]
+            test_list = table_df[['serving_network','nr5g_PCI','nr5g_Rsrp','nr5g_Sinr','nr5g_TxPwrTotal_Actual',
+                                  'nr5g_Pdsch_Bler','nr5g_pc_pusch_bler','nr5g_DlMcs_Ant0_Avg','nr5g_Rx_NumOfRb_Avg','nr5g_UlMcs_Avg',
+                                  'nr5g_Rx_NumOfRB', 'data_ex_rx_thravg','data_ftp_rx_tp']]
+            global grad_index_rows
+            global grad_index_columns
+            grad_index_columns = 0
+            grad_index_rows = 0
+            s = test_list.style.applymap(background_color,
+                                         grad_cam = np.array(grad_cam),
+                                         total_df = table_df).highlight_null('black')
+
     return render_template('analysis-temp.html',
                            main_result ='SINR불량으로 인한 ~~~~~~~~',
                            analysis_table = Markup(s.render()),
                            graph_path="/analysis/graph/"+path,
                            map_path="/analysis/map/"+path)
+
+@app.route("/select_model/<path>" , methods=['GET','POST'])
+def select_model(path):
+    if request.method == "POST":
+        select_model = request.form.get('model-select', None)
+        select_speed = request.form.get('model-speed', None)
+    
+    webbrowser.open_new(f"""http://localhost:5000/analysis/{select_model}/{select_speed}/{path}""")
+    return redirect('http://localhost:5000/'+path)
+#     return render_template(f"""index.html""",
+#                            filename="",
+#                            image_file = "image/1.jpg",
+#                            Map_Info = "맵에 대한 설명",
+#                            open_page = f"""http://localhost:5000/select_model/{path}"""
+# #                            open_page = f"""http://localhost:5000/analysis/{select_model}/{select_speed}/{path}"""
+#                           )
+# just to see what select is
+
+@app.route("/select_speed" , methods=['GET', 'POST'])
+def select_speed():
+    select = request.form.get('form-control-speed')
+    return(str(select)) # just to see what select is
+
 
 if __name__ == '__main__':
     # threaded=True 로 넘기면 multiple plot이 가능해짐
